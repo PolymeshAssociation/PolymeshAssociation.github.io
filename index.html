@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>POLYX Circulating Supply</title>
+        <script type="text/javascript">
+            var totalSupplyURL = 'https://polymesh.api.subscan.io/api/scan/token'
+            var totalSupplyXhttp = new XMLHttpRequest();          
+            var totalSupply = 0;
+            totalSupplyXhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    totalSupply = JSON.parse(totalSupplyXhttp.responseText).data.detail.POLYX.total_issuance/1000000;
+                    document.getElementById("c").innerHTML = totalSupply;
+                }
+            };
+            totalSupplyXhttp.open("GET", totalSupplyURL, true);
+            totalSupplyXhttp.send();
+        </script>
+    </head>
+    <body id="c">
+    </body>
+</html>
