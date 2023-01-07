@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>POLYX Circulating Supply</title>
+    </head>
+    <body id="circ"></body>
+    <script type="text/javascript">
+        const apiKey1 = 'dbb6f2e5fc3b40c69b44bac87895ad8c';
+        const apiKey2 = '806bad68b2894b29aeeac7802f4dedc8';
+        const totalSupplyURL = 'https://polymesh.api.subscan.io/api/scan/token';
+        const balanceURL = 'https://polymesh.api.subscan.io/api/scan/account/tokens';
+        const associationAddresses = [
+            '2FEWmTkH9czpKJSnnFxJhMaKHaM6H7k57PDSqJgqifwfBvLh',
+            '2GrcoMQBMUgi2tN7YGALGniA14tdc2sZutUVa6uETDtGcqVY',
+            '2G2aYVLGrtVJabA1wjkg2NvmWpLyWHASKh8s9SGpUQoUTZtx',
+            '2F5eK4mfXfMRYmfYAsvqnakTDVn7CciBKtmY3b5yA5vJbjkK',
+            '2DbjUiD2vUgPaWyFgmNnbWXGBRS8QxG5yy71Vhd35WJePw6Y',
+            '2HexZQdNn9KziSkEek6E1Y68gUdP69JFs8szQQyUvYBX7HMq',
+            '2FT35TKtSvjrKPhwzSbHE2aqWnEYiMubrjxj9pZUQDM9yHMa',
+            '2EvQQsqdCSiHGUXeTqp5F1i76GFBheTUG7rLdRXk3qAcLroV',
+            '2EvQQsqdCSiGzQ9WVzDFbsipQfanMccrJ42PKN6mRgPm15hn',
+        ];
+        let totalSupply = 0;
+        let balance = 0;
+
+        const circulatingSupply = async () => {
+            const getTotalSupply = () => {
+                return new Promise((resolve) => {
+                    const request = new XMLHttpRequest();
+                    request.open('GET', totalSupplyURL, true);
+                    request.setRequestHeader('X-API-Key', apiKey1);
+                    request.setRequestHeader('Content-Type', 'application/json');
+                    request.send();
+                    request.onreadystatechange = function () {
+                        if (this.readyState === 4 && this.status === 200) {
+                            const parsedResponse = JSON.parse(request.responseText);
+                            resolve(parsedResponse.data.detail.POLYX.total_issuance);
+                        }
+                    };
+                });
+            };
+
+            const getBalances = async () => {
+                const balances = associationAddresses.map((address, index) => {
+                    return new Promise((resolve, reject) => {
+                        const request = new XMLHttpRequest();
+                        request.onreadystatechange = function () {
+                            if (this.readyState === 4 && this.status === 200) {
+                                const parsedResponse = JSON.parse(request.responseText);
+                                const balance = parseInt(parsedResponse.data.native[0].balance);
+                                resolve(balance);
+                            }
+                        };
+                        let data = JSON.stringify({
+                            address: address,
+                        });
+                        request.open('POST', balanceURL, true);
+                        request.setRequestHeader('X-API-Key', index < 4 ? apiKey1 : apiKey2);
+                        request.setRequestHeader('Content-Type', 'application/json');
+                        request.send(data);
+                    });
+                });
+                return Promise.all(balances);
+            };
+            Promise.all([getTotalSupply(), getBalances()]).then(([totalSupply, balances]) => {
+                associationTokens = balances.reduce((a, b) => a + b, 0);
+                document.getElementById('circ').innerHTML = (totalSupply - associationTokens) / 1000000;
+            });
+        };
+        circulatingSupply();
+    </script>
+</html>
