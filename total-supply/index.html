@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>POLYX Total Supply</title>
+        <script type="text/javascript">
+            var totalSupplyURL = 'https://polymesh.api.subscan.io/api/scan/token';
+            const request = new XMLHttpRequest();
+            request.open('GET', totalSupplyURL, true);
+            request.setRequestHeader('X-API-Key', '806bad68b2894b29aeeac7802f4dedc8');
+            request.setRequestHeader('Content-Type', 'application/json');
+            request.send();
+            request.onreadystatechange = function () {
+                if (this.readyState === 4 && this.status === 200) {
+                    const totalSupply = JSON.parse(request.responseText).data.detail.POLYX.total_issuance / 1000000;
+                    document.getElementById('total').innerHTML = totalSupply;
+                }
+            };
+        </script>
+    </head>
+    <body id="total"></body>
+</html>
